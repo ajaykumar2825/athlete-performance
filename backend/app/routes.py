@@ -1,10 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
-from app.models import Athlete, Performance
+from app.database import get_db
+from app.models import Athlete, Performance, ImportantDate, Message
 import os
 import uuid
 from app.ml_engine import process_video
+from datetime import datetime
 
 import sys
 print("ROUTES FILE LOADED FROM:", __file__)
@@ -15,14 +16,6 @@ router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/athletes/")
@@ -82,3 +75,55 @@ async def upload_video(
     "accuracy": metrics["accuracy"],
     "endurance": metrics["endurance"]
 }
+
+@router.post("/messages/{athlete_id}")
+def create_message(athlete_id: int, payload: dict, db: Session = Depends(get_db)):
+    message = Message(
+        athlete_id=athlete_id,
+        text=payload["text"],
+        timestamp=str(datetime.now())
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message
+
+
+@router.get("/messages/{athlete_id}")
+def get_messages(athlete_id: int, db: Session = Depends(get_db)):
+    return db.query(Message).filter(Message.athlete_id == athlete_id).all()
+
+@router.post("/dates/{athlete_id}")
+def create_date(athlete_id: int, payload: dict, db: Session = Depends(get_db)):
+    new_date = ImportantDate(
+        athlete_id=athlete_id,
+        event_date=payload["event_date"],
+        description=payload["description"]
+    )
+    db.add(new_date)
+    db.commit()
+    db.refresh(new_date)
+    return new_date
+
+
+@router.get("/dates/{athlete_id}")
+def get_dates(athlete_id: int, db: Session = Depends(get_db)):
+    return db.query(ImportantDate).filter(ImportantDate.athlete_id == athlete_id).all()
+
+@router.delete("/messages/{message_id}")
+def delete_message(message_id: int, db: Session = Depends(get_db)):
+    message = db.query(Message).filter(Message.id == message_id).first()
+    if not message:
+        return {"error": "Message not found"}
+    db.delete(message)
+    db.commit()
+    return {"message": "Message deleted"}
+
+@router.delete("/dates/{date_id}")
+def delete_date(date_id: int, db: Session = Depends(get_db)):
+    date = db.query(ImportantDate).filter(ImportantDate.id == date_id).first()
+    if not date:
+        return {"error": "Date not found"}
+    db.delete(date)
+    db.commit()
+    return {"message": "Date deleted"}

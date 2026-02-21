@@ -112,7 +112,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Switch to main app
     loginPage.style.display = 'none';
-    appMain.style.display = 'flex';
+    appMain.style.display = 'flex';  
+    // 🔥 Connect to backend AFTER login
+      connectPlayerToBackend(fullName);
   });
 
   // ---------- SLIDING PROFILE PANEL ----------
@@ -136,6 +138,7 @@ document.addEventListener("DOMContentLoaded", function() {
   changePhotoBtn.addEventListener('click', triggerFileUpload);
   // Click on overlay also triggers
   document.querySelector('.photo-upload-overlay')?.addEventListener('click', triggerFileUpload);
+
 
   // Handle file selection
   profilePhotoUpload.addEventListener('change', function(e) {
@@ -309,6 +312,79 @@ document.addEventListener("DOMContentLoaded", function() {
     localStorage.removeItem('athleteHistory');
     localStorage.removeItem('athleteProfile');
   } catch (e) {}
+
+  // 🔥 CONNECT PLAYER TO BACKEND
+async function connectPlayerToBackend(fullName) {
+  try {
+    // 1️⃣ Get all athletes from backend
+    const response = await fetch("http://localhost:8000/athletes/");
+    if (!response.ok) throw new Error("Failed to fetch athletes");
+
+    const athletes = await response.json();
+
+    // 2️⃣ Find this player in backend list
+    const athlete = athletes.find(a => a.full_name === fullName);
+
+    if (!athlete) {
+      alert("Athlete not found. Please contact your coach.");
+      return;
+    }
+
+    const athleteId = athlete.id;
+
+    // 3️⃣ Fetch messages
+    await fetchMessagesForPlayer(athleteId);
+
+    // 4️⃣ Fetch important dates
+    await fetchDatesForPlayer(athleteId);
+
+  } catch (err) {
+    console.error("Backend connection error:", err);
+  }
+}
+
+// 🔥 Fetch messages for player
+async function fetchMessagesForPlayer(athleteId) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/messages/${athleteId}`
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch messages");
+
+    const messages = await response.json();
+
+    displayCoachMessages(messages);
+
+  } catch (err) {
+    console.error("Message fetch error:", err);
+  }
+}
+
+// 🔥 Fetch important dates for player
+async function fetchDatesForPlayer(athleteId) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/dates/${athleteId}`
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch dates");
+
+    const dates = await response.json();
+
+    // Convert backend format to UI format
+    const formatted = dates.map(d => ({
+      title: "Coach Event",
+      date: d.event_date,
+      description: d.description
+    }));
+
+    displayImportantDates(formatted);
+
+  } catch (err) {
+    console.error("Date fetch error:", err);
+  }
+}
 
   console.log('SportIQ: Athlete Hub ready. Awaiting coach data.');
 });

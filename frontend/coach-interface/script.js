@@ -5,8 +5,6 @@
 // ---------- GLOBAL DATA ----------
 let athletes = JSON.parse(localStorage.getItem('coachAthletes')) || [];
 let allHistory = JSON.parse(localStorage.getItem('allHistory')) || [];
-let playerEvents = JSON.parse(localStorage.getItem('playerEvents')) || {};
-let playerMessages = JSON.parse(localStorage.getItem('playerMessages')) || {};
 let globalChart = null;
 
 // ---------- DOM ELEMENTS ----------
@@ -56,6 +54,8 @@ function showApp(name) {
       // Already rendered from localStorage above, nothing to do
     });
 }
+
+
 
 // ---------- INITIAL SETUP ----------
 window.onload = function() {
@@ -166,11 +166,6 @@ window.removeAthlete = async function(athleteId) {
 
     allHistory = allHistory.filter(r => r.name !== athlete.fullName);
     localStorage.setItem('allHistory', JSON.stringify(allHistory));
-
-    delete playerEvents[athleteId];
-    delete playerMessages[athleteId];
-    localStorage.setItem('playerEvents', JSON.stringify(playerEvents));
-    localStorage.setItem('playerMessages', JSON.stringify(playerMessages));
 
     renderAthleteTable();
     populateAnalysisSelect();
@@ -336,13 +331,18 @@ window.renderGlobalChart = function() {
 let currentModalAthleteId = null;
 
 window.openPlayerDetailModal = function(athleteId, athleteName) {
+
   currentModalAthleteId = athleteId;
+
   document.getElementById('modalPlayerName').textContent = athleteName;
-  if (!playerEvents[athleteId]) playerEvents[athleteId] = [];
-  if (!playerMessages[athleteId]) playerMessages[athleteId] = [];
-  renderPlayerDates();
-  renderPlayerMessages();
+
+  // 🔥 Load real data from backend instead of localStorage
+  loadMessagesFromBackend(athleteId);
+  loadDatesFromBackend(athleteId);
+
+  // Performance history can remain local (since it's chart-based)
   renderPlayerPerfHistory(athleteName);
+
   document.getElementById('playerDetailModal').style.display = 'flex';
 };
 
@@ -351,68 +351,117 @@ window.closePlayerModal = function() {
   currentModalAthleteId = null;
 };
 
-function renderPlayerDates() {
+function renderBackendDates(dates) {
   const list = document.getElementById('playerDatesList');
-  const events = playerEvents[currentModalAthleteId] || [];
-  if (!events.length) { list.innerHTML = '<p class="text-muted">No important dates yet.</p>'; return; }
-  list.innerHTML = events.map((ev, idx) => `
-    <div class="event-item d-flex justify-content-between align-items-center">
-      <div><span class="fw-bold">${ev.date}</span><br><span>${ev.text}</span></div>
-      <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePlayerEvent(${idx})">
+
+  if (!dates.length) {
+    list.innerHTML = '<p class="text-muted">No important dates yet.</p>';
+    return;
+  }
+
+  list.innerHTML = dates.map(d => `
+    <div class="event-item d-flex justify-content-between">
+      <div>
+        <span class="fw-bold">${d.event_date}</span><br>
+        <span>${d.description}</span>
+      </div>
+      <button class="btn btn-sm btn-outline-danger"
+        onclick="deleteDate(${d.id})">
         <i class="fas fa-trash"></i>
       </button>
     </div>
   `).join('');
 }
 
-window.addEventForPlayer = function() {
+window.addEventForPlayer = async function() {
   const date = document.getElementById('modalEventDate').value;
   const desc = document.getElementById('modalEventDesc').value.trim();
-  if (!date || !desc) { alert('Please select a date and enter a description'); return; }
-  playerEvents[currentModalAthleteId].push({ date, text: desc });
-  localStorage.setItem('playerEvents', JSON.stringify(playerEvents));
-  document.getElementById('modalEventDate').value = '';
-  document.getElementById('modalEventDesc').value = '';
-  renderPlayerDates();
+
+  if (!date || !desc) {
+    alert('Please select a date and enter a description');
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/dates/${currentModalAthleteId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          event_date: date,
+          description: desc
+        })
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to add date");
+
+    document.getElementById('modalEventDate').value = '';
+    document.getElementById('modalEventDesc').value = '';
+
+    await loadDatesFromBackend(currentModalAthleteId);
+
+  } catch (err) {
+    alert("Error adding date: " + err.message);
+  }
 };
 
-window.removePlayerEvent = function(index) {
-  playerEvents[currentModalAthleteId].splice(index, 1);
-  localStorage.setItem('playerEvents', JSON.stringify(playerEvents));
-  renderPlayerDates();
-};
-
-function renderPlayerMessages() {
+function renderBackendMessages(messages) {
   const list = document.getElementById('playerMessagesList');
-  const msgs = playerMessages[currentModalAthleteId] || [];
-  if (!msgs.length) { list.innerHTML = '<p class="text-muted">No messages yet.</p>'; return; }
-  list.innerHTML = msgs.map((msg, idx) => `
+
+  if (!messages.length) {
+    list.innerHTML = '<p class="text-muted">No messages yet.</p>';
+    return;
+  }
+
+  list.innerHTML = messages.map(msg => `
     <div class="message-item">
       <div class="d-flex justify-content-between">
-        <small class="text-muted">${msg.timestamp || ''}</small>
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePlayerMessage(${idx})">
+        <small class="text-muted">${msg.timestamp}</small>
+        <button class="btn btn-sm btn-outline-danger"
+          onclick="deleteMessage(${msg.id})">
           <i class="fas fa-trash"></i>
         </button>
       </div>
       <div class="mt-1">${msg.text}</div>
-      ${msg.isNew ? '<span class="badge bg-danger ms-2">new</span>' : ''}
     </div>
   `).join('');
 }
 
-window.addMessageForPlayer = function() {
+window.addMessageForPlayer = async function() {
   const text = document.getElementById('modalMessageText').value.trim();
-  if (!text) { alert('Message cannot be empty'); return; }
-  playerMessages[currentModalAthleteId].push({ text, timestamp: new Date().toLocaleString(), isNew: true });
-  localStorage.setItem('playerMessages', JSON.stringify(playerMessages));
-  document.getElementById('modalMessageText').value = '';
-  renderPlayerMessages();
-};
+  if (!text) {
+    alert('Message cannot be empty');
+    return;
+  }
 
-window.removePlayerMessage = function(index) {
-  playerMessages[currentModalAthleteId].splice(index, 1);
-  localStorage.setItem('playerMessages', JSON.stringify(playerMessages));
-  renderPlayerMessages();
+  try {
+    const response = await fetch(
+      `http://localhost:8000/messages/${currentModalAthleteId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: text
+        })
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to send message");
+
+    document.getElementById('modalMessageText').value = '';
+
+    // Reload messages from backend
+    await loadMessagesFromBackend(currentModalAthleteId);
+
+  } catch (err) {
+    alert("Error sending message: " + err.message);
+  }
 };
 
 function renderPlayerPerfHistory(playerName) {
@@ -425,4 +474,74 @@ function renderPlayerPerfHistory(playerName) {
       <span>⚡ ${r.speed} m/s | 🎯 ${r.accuracy}% | ❤️ ${r.endurance}%</span>
     </div>
   `).join('');
+}
+
+async function loadDatesFromBackend(athleteId) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/dates/${athleteId}`
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch dates");
+
+    const dates = await response.json();
+
+    renderBackendDates(dates);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function deleteMessage(messageId) {
+  if (!confirm("Delete this message?")) return;
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/messages/${messageId}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) throw new Error("Failed to delete");
+
+    loadMessagesFromBackend(currentModalAthleteId);
+
+  } catch (err) {
+    alert("Error deleting message");
+  }
+}
+
+async function deleteDate(dateId) {
+  if (!confirm("Delete this date?")) return;
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/dates/${dateId}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) throw new Error("Failed to delete");
+
+    loadDatesFromBackend(currentModalAthleteId);
+
+  } catch (err) {
+    alert("Error deleting date");
+  }
+}
+
+async function loadMessagesFromBackend(athleteId) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/messages/${athleteId}`
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch messages");
+
+    const messages = await response.json();
+
+    renderBackendMessages(messages);
+
+  } catch (err) {
+    console.error(err);
+  }
 }
