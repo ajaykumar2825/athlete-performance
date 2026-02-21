@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportIQ · Athlete Hub</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Custom CSS -->
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== LOGIN PAGE (FULL WINDOW) ===== -->
+  <div id="loginPage" class="login-wrapper">
+    <div class="login-card">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="icon-badge">
+          <i class="fas fa-running"></i>
+        </div>
+        <div>
+          <h1 class="fw-bold mb-0" style="color: #1e2f4a;">Athlete Login</h1>
+          <p class="text-secondary mt-1 mb-0">Enter your full name and secure code</p>
+        </div>
+      </div>
+
+      <form id="loginForm">
+        <!-- FULL NAME (First + Last) -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">Full name <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="far fa-id-card text-muted"></i></span>
+            <input 
+              type="text" 
+              id="fullNameInput" 
+              class="form-control border-start-0 ps-0" 
+              placeholder="e.g. John Michael Smith"
+              autocomplete="off"
+              required
+            >
+          </div>
+          <div class="form-text text-muted mt-1">
+            <i class="fas fa-info-circle me-1"></i> Enter your full name including surname
+          </div>
+        </div>
+
+        <!-- PASSWORD: dots appear, only letters/numbers/symbols allowed -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">Access code <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-lock text-muted"></i></span>
+            <input 
+              type="password" 
+              id="passwordInput" 
+              class="form-control border-start-0 ps-0" 
+              placeholder="••••••••"
+              autocomplete="off"
+              maxlength="30"
+              pattern="[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':\\|,.<>\/?~]+"
+              title="Only letters, numbers, and common symbols allowed"
+              required
+            >
+          </div>
+          <div class="form-text text-muted mt-1">
+            <i class="fas fa-shield-alt me-1"></i> Characters hidden · letters, numbers & symbols only
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="demo-hint">
+            <i class="fas fa-info-circle me-1"></i> Use any full name + code
+          </div>
+          <button type="submit" id="loginBtn" class="btn btn-login px-5 py-2">
+            <i class="fas fa-arrow-right-to-bracket me-2"></i>Login
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP (HIDDEN UNTIL LOGIN) ===== -->
+  <div id="appMain" class="app-wrapper" style="display: none;">
+
+    <!-- ===== NAVBAR with PROFILE SLIDE TRIGGER ===== -->
+    <nav class="navbar navbar-dark bg-dark px-4 py-3">
+      <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
+        <a class="navbar-brand fw-bold text-uppercase fs-3" href="#">
+          <span style="color:#36A2EB;">Player</span><span style="color:#FF6384;"> Performance</span>
+        </a>
+        
+        <!-- === PROFILE BADGE: click to slide profile open === -->
+        <div id="profileBadge" class="profile-badge" role="button" tabindex="0">
+          <div class="profile-badge-info">
+            <span id="navbarPlayerName" class="player-name">Athlete</span>
+            <small class="player-role">Athlete</small>
+          </div>
+          <div id="profileThumb" class="profile-thumb">
+            <img id="profileThumbImg" src="https://ui-avatars.com/api/?name=Athlete&background=36A2EB&color=fff&size=64" alt="Profile">
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===== SLIDING PROFILE PANEL (RIGHT SIDE) ===== -->
+    <div id="profilePanel" class="profile-panel closed">
+      <div class="profile-panel-header">
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <h3 class="fw-bold mb-0"><i class="fas fa-user-circle me-2"></i>Athlete Profile</h3>
+          <button id="closeProfileBtn" class="btn-close fs-5"></button>
+        </div>
+      </div>
+
+      <!-- Profile content scrollable -->
+      <div class="profile-panel-body">
+        <!-- PROFILE PHOTO SECTION with UPLOAD & CHANGE -->
+        <div class="profile-photo-section text-center">
+          <div class="profile-photo-wrapper">
+            <img id="profilePhotoMain" src="https://ui-avatars.com/api/?name=Athlete&background=36A2EB&color=fff&size=128" alt="Profile Photo">
+            <div class="photo-upload-overlay">
+              <label for="profilePhotoUpload" class="upload-label">
+                <i class="fas fa-camera"></i>
+              </label>
+              <input type="file" id="profilePhotoUpload" accept="image/*" style="display: none;">
+            </div>
+          </div>
+          <div class="mt-2">
+            <span id="profileFullNameDisplay" class="fs-4 fw-bold">Athlete Name</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary ms-2 px-3 py-2">verified</span>
+          </div>
+          <div class="d-flex gap-2 justify-content-center mt-3">
+            <button id="changePhotoBtn" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+              <i class="fas fa-upload me-1"></i>Change photo
+            </button>
+            <button id="removePhotoBtn" class="btn btn-sm btn-outline-secondary rounded-pill px-4">
+              <i class="fas fa-trash-alt me-1"></i>Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- EDITABLE PHYSICAL DETAILS -->
+        <div class="details-section mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="fas fa-dumbbell me-2"></i>Physical details</h5>
+            <button id="editDetailsBtn" class="btn btn-sm btn-primary rounded-pill px-4">
+              <i class="fas fa-pencil-alt me-1"></i>Edit
+            </button>
+          </div>
+
+          <div id="detailsViewMode" class="details-view">
+            <div class="detail-item">
+              <span class="detail-label">Age</span>
+              <span id="displayAge" class="detail-value">—</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Height (cm)</span>
+              <span id="displayHeight" class="detail-value">—</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Weight (kg)</span>
+              <span id="displayWeight" class="detail-value">—</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Sport</span>
+              <span id="displaySport" class="detail-value">—</span>
+            </div>
+          </div>
+
+          <div id="detailsEditMode" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Age</label>
+              <input type="number" id="editAge" class="form-control" min="12" max="80" placeholder="years">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Height (cm)</label>
+              <input type="number" id="editHeight" class="form-control" min="100" max="250" placeholder="cm">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Weight (kg)</label>
+              <input type="number" id="editWeight" class="form-control" min="30" max="200" step="0.1" placeholder="kg">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Sport</label>
+              <input type="text" id="editSport" class="form-control" placeholder="e.g. Athletics, Swimming">
+            </div>
+            <div class="d-flex gap-2">
+              <button id="saveDetailsBtn" class="btn btn-success rounded-pill px-4"><i class="fas fa-save me-1"></i>Save</button>
+              <button id="cancelEditBtn" class="btn btn-outline-secondary rounded-pill px-4"><i class="fas fa-times me-1"></i>Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE DATA (FROM COACH) -->
+        <div class="performance-section mt-5">
+          <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Performance data</h5>
+          <div id="performanceContainer" class="performance-list">
+            <!-- Coach will inject dynamic data here -->
+          </div>
+          <div id="noPerformanceMsg" class="empty-state small">
+            <i class="fas fa-chart-bar fa-2x mb-2 opacity-50"></i>
+            <p class="fw-medium">No performance data yet</p>
+            <span class="text-muted">Coach will post stats here</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="profileOverlay" class="profile-overlay"></div>
+
+    <!-- ===== MAIN CONTENT: DATES & MESSAGES ===== -->
+    <main class="main-content">
+      <!-- LEFT PANEL: IMPORTANT DATES -->
+      <div class="dates-panel">
+        <div class="panel-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-badge-small">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h2 class="fw-bold mb-0">Important Dates</h2>
+          </div>
+          <p class="text-muted mt-2 mb-0">Key events from your coach</p>
+        </div>
+        <div id="datesContainer" class="dates-list"></div>
+        <div id="noDatesMessage" class="empty-state">
+          <i class="far fa-calendar-times fa-3x mb-3 opacity-50"></i>
+          <p class="fs-5 fw-medium">No important dates yet</p>
+          <span class="text-muted">Coach will post dates here</span>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: COACH MESSAGES -->
+      <div class="messages-panel">
+        <div class="panel-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-badge-small" style="background: linear-gradient(145deg, #FF6384, #d94a6a);">
+              <i class="fas fa-comment-dots"></i>
+            </div>
+            <h2 class="fw-bold mb-0">Messages from Coach</h2>
+          </div>
+          <p class="text-muted mt-2 mb-0">Latest updates</p>
+        </div>
+        <div id="messagesContainer" class="messages-list"></div>
+        <div id="noMessagesMessage" class="empty-state">
+          <i class="far fa-comment-dots fa-3x mb-3 opacity-50"></i>
+          <p class="fs-5 fw-medium">No messages yet</p>
+          <span class="text-muted">Coach messages will appear here</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3 footer">
+      <p class="mb-0 small opacity-75">© 2026 SportIQ — athlete command center</p>
+    </footer>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>

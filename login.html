@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sports Analytics Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h2>Welcome to SportIQ</h2>
+      <p class="subtitle">Track your performance or your student performance</p>
+      
+      <label for="userRole">Select your role:</label>
+      <select id="userRole">
+        <option value="player">Player</option>
+        <option value="coach">Coach</option>
+      </select>
+      
+      <button onclick="login()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const role = document.getElementById("userRole").value;
+      if (role === "player") {
+        window.location.href = "frontend/player-interface/index.html";
+      } else if (role === "coach") {
+        window.location.href = "frontend/coach-interface/index.html";
+      }
+    }
+  </script>
+</body>
+</html>

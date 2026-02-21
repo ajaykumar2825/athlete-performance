@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportIQ · Coach Command</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS -->
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ========== COACH LOGIN PAGE ========== -->
+<div id="coachLoginPage" class="login-wrapper">
+  <div class="login-card">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="icon-badge"><i class="fas fa-chalkboard-teacher"></i></div>
+      <div><h1 class="fw-bold mb-0" style="color:#1e2f4a;">Coach Login</h1><p class="text-secondary mt-1">Sign in with your credentials</p></div>
+    </div>
+    <form id="coachLoginForm">
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Full name <span class="text-danger">*</span></label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="far fa-id-card text-muted"></i></span>
+          <input type="text" id="coachFullName" class="form-control border-start-0 ps-0" placeholder="e.g. Coach Martinez" value="Coach Martinez" required>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Access code</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="fas fa-lock text-muted"></i></span>
+          <input type="password" id="coachPassword" class="form-control border-start-0 ps-0" value="coach123" placeholder="••••••">
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="demo-hint"><i class="fas fa-info-circle me-1"></i> demo: any name/code</div>
+        <button type="submit" class="btn btn-login px-5 py-2"><i class="fas fa-arrow-right-to-bracket me-2"></i>Login</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========== COACH MAIN APPLICATION ========== -->
+<div id="coachAppMain" class="coach-app" style="display: none;">
+
+  <!-- Navbar with Profile Badge -->
+  <nav class="navbar-coach">
+    <div class="coach-brand"><span>Coach</span><span>Command</span></div>
+    <div id="coachProfileBadge" class="profile-badge">
+      <div class="profile-badge-info">
+        <span id="navbarCoachName" class="coach-name">Coach</span>
+        <small class="coach-role">Head Coach</small>
+      </div>
+      <div class="profile-thumb">
+        <img id="coachThumbImg" src="https://ui-avatars.com/api/?name=Coach+Martinez&background=2a5c8a&color=fff&size=64" alt="Coach">
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== SLIDING PROFILE PANEL (COACH) ===== -->
+  <div id="coachProfilePanel" class="profile-panel closed">
+    <div class="profile-panel-header d-flex justify-content-between align-items-center">
+      <h3 class="fw-bold mb-0"><i class="fas fa-user-tie me-2"></i>Coach Profile</h3>
+      <button id="closeCoachProfileBtn" class="btn-close fs-5"></button>
+    </div>
+    <div class="profile-panel-body">
+      <div class="text-center">
+        <div class="profile-photo-wrapper mx-auto" style="width:130px;height:130px;border-radius:50%;overflow:hidden;border:4px solid white;box-shadow:0 8px 20px rgba(0,0,0,0.1);">
+          <img id="coachProfilePhoto" src="https://ui-avatars.com/api/?name=Coach+Martinez&background=2a5c8a&color=fff&size=128" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="mt-3">
+          <span id="coachProfileName" class="fs-4 fw-bold">Coach Martinez</span>
+        </div>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button id="coachChangePhotoBtn" class="btn btn-sm btn-outline-primary rounded-pill px-4"><i class="fas fa-upload me-1"></i>Change</button>
+          <button id="coachRemovePhotoBtn" class="btn btn-sm btn-outline-secondary rounded-pill px-4"><i class="fas fa-trash-alt me-1"></i>Remove</button>
+        </div>
+        <input type="file" id="coachPhotoUpload" accept="image/*" style="display:none;">
+      </div>
+      <hr class="my-4">
+      <div class="text-muted small"><i class="fas fa-info-circle me-1"></i> Coach credentials & settings can be updated here.</div>
+    </div>
+  </div>
+  <div id="coachProfileOverlay" class="profile-overlay"></div>
+
+  <!-- ===== DASHBOARD: ATHLETE LIST + VIDEO ANALYSIS ===== -->
+  <div class="dashboard-main">
+    <!-- LEFT: Athlete management panel -->
+    <div class="athlete-panel">
+      <div class="section-title"><i class="fas fa-users me-2"></i>Athletes</div>
+      
+      <!-- Add Athlete (with surname) -->
+      <div class="add-bar">
+        <input type="text" id="athleteFullName" class="form-control" placeholder="Full name (with surname)">
+        <input type="text" id="athleteSportInput" class="form-control" placeholder="Sport">
+        <button class="btn btn-primary" onclick="addAthlete()"><i class="fas fa-plus-circle me-1"></i>Add</button>
+      </div>
+      
+      <!-- Search -->
+      <div class="search-bar">
+        <input type="text" id="searchAthleteInput" class="form-control" placeholder="Search athletes..." onkeyup="searchAthletes()">
+      </div>
+
+      <!-- Athlete Table with REMOVE button -->
+      <div class="table-responsive">
+        <table class="athlete-table">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Sport</th>
+              <th>Manage</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="athleteTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Video Upload + Analysis + Global Chart -->
+    <div class="right-panel">
+      <div class="section-title"><i class="fas fa-video me-2"></i>Performance Analysis</div>
+      
+      <!-- Video Upload Section -->
+      <div class="video-section">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">1. Select Athlete</label>
+          <select id="analysisAthleteSelect" class="form-select"></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">2. Upload performance video</label>
+          <input type="file" id="coachVideoUpload" accept="video/*" class="form-control">
+        </div>
+        <button type="button"
+        class="btn btn-success w-100"
+        onclick="analyzeAthleteVideo()"></i>Analyze & Save</button>
+        
+        <!-- Latest analysis result -->
+        <div id="latestAnalysisResult" class="analysis-result" style="display:none;">
+          <h6 class="fw-bold"><i class="fas fa-microchip me-1"></i>Latest result</h6>
+          <div id="analysisDetails"></div>
+        </div>
+      </div>
+
+      <!-- Global Accuracy Chart (Coach overview) -->
+      <div style="margin-top: 0.5rem;">
+        <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2"></i>Accuracy breakdown (all athletes)</h6>
+        <canvas id="accuracyChartGlobal" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PLAYER DETAIL MODAL (hidden by default) ===== -->
+  <div id="playerDetailModal" class="modal-custom" style="display: none;">
+    <div class="modal-content-custom">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold" id="modalPlayerName">Player Name</h3>
+        <button class="btn-close fs-4" onclick="closePlayerModal()"></button>
+      </div>
+      
+      <!-- TABS: Important Dates & Messages -->
+      <ul class="nav nav-tabs mb-4" id="playerModalTabs">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#datesTab">📅 Important Dates</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#messagesTab">💬 Coach Messages</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#perfTab">📊 Performance</a></li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- DATES TAB -->
+        <div id="datesTab" class="tab-pane fade show active">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Add important date</label>
+            <div class="d-flex gap-2">
+              <input type="date" id="modalEventDate" class="form-control" style="max-width:160px;">
+              <input type="text" id="modalEventDesc" class="form-control" placeholder="Event description">
+              <button class="btn btn-primary" onclick="addEventForPlayer()"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <div id="playerDatesList" class="mt-3"></div>
+        </div>
+        <!-- MESSAGES TAB -->
+        <div id="messagesTab" class="tab-pane fade">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">New message</label>
+            <div class="d-flex gap-2">
+              <input type="text" id="modalMessageText" class="form-control" placeholder="Write message...">
+              <button class="btn btn-primary" onclick="addMessageForPlayer()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+          <div id="playerMessagesList" class="mt-3"></div>
+        </div>
+        <!-- PERFORMANCE TAB (History) -->
+        <div id="perfTab" class="tab-pane fade">
+          <div id="playerPerfHistoryList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS for tabs -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JavaScript -->
+<script src="script.js"></script>
+</body>
+</html>
