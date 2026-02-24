@@ -41,7 +41,7 @@ function showApp(name) {
   renderGlobalChart();
 
   // ✅ Then sync with backend silently in background
-  fetch("http://localhost:8000/athletes/")
+  fetch("http://127.0.0.1:8000/athletes/")
     .then(r => r.json())
     .then(data => {
       athletes = data.map(a => ({ id: a.id, fullName: a.full_name, sport: a.sport }));
@@ -125,7 +125,7 @@ window.addAthlete = async function() {
 
   try {
     const response = await fetch(
-      `http://localhost:8000/athletes/?full_name=${encodeURIComponent(fullName)}&sport=${encodeURIComponent(sport)}`,
+      `http://127.0.0.1:8000/athletes/?full_name=${encodeURIComponent(fullName)}&sport=${encodeURIComponent(sport)}`,
       { method: "POST" }
     );
     if (!response.ok) throw new Error("Failed to save athlete");
@@ -156,7 +156,7 @@ window.removeAthlete = async function(athleteId) {
   if (!athlete) return;
 
   try {
-    const response = await fetch(`http://localhost:8000/athletes/${athleteId}`, {
+    const response = await fetch(`http://127.0.0.1:8000/athletes/${athleteId}`, {
       method: "DELETE"
     });
     if (!response.ok) throw new Error("Failed to delete from backend");
@@ -225,7 +225,6 @@ window.populateAnalysisSelect = function() {
 
 // ---------- VIDEO ANALYSIS ----------
 window.analyzeAthleteVideo = async function () {
-
   const select = document.getElementById("analysisAthleteSelect");
   const fileInput = document.getElementById("coachVideoUpload");
 
@@ -242,57 +241,118 @@ window.analyzeAthleteVideo = async function () {
   const athleteId = parseInt(select.value);
   const file = fileInput.files[0];
 
+    console.log("🔍 DEBUG - Selected athlete ID:", athleteId);
+  console.log("🔍 DEBUG - File name:", file.name);
+  console.log("🔍 DEBUG - File size:", file.size, "bytes");
+  console.log("🔍 DEBUG - File type:", file.type);
+
   const formData = new FormData();
   formData.append("file", file);
 
   try {
-    const response = await fetch(`http://localhost:8000/analysis/${athleteId}`, {
+    console.log("📤 Sending video for athlete ID:", athleteId);
+    
+    const response = await fetch(`http://127.0.0.1:8000/analysis/${athleteId}`, {
       method: "POST",
       body: formData
     });
 
+    console.log("📥 Response status:", response.status);
+    console.log("📥 Response headers:", [...response.headers.entries()]);
+
+    // Get the response as text first to see what's coming
+    const responseText = await response.text();
+    console.log("📄 Raw response text:", responseText);
+
     if (!response.ok) {
-      throw new Error("Server returned " + response.status);
+      throw new Error(`Server returned ${response.status}: ${responseText}`);
     }
 
-    console.log("Response status:", response.status);
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log("✅ Parsed JSON data:", data);
+    } catch (e) {
+      console.error("❌ Failed to parse JSON:", e);
+      console.error("❌ Full response text:", responseText);
+      alert("Response is not valid JSON. Check console for details.");
+      return;
+    }
 
-    const data = await response.json();
-    console.log("Backend response:", data);
+    // Check if there's an error in the response
+    if (data.error) {
+      throw new Error(data.error);
+    }
 
-    const { speed, accuracy, endurance } = data.metrics || {};
+    // Extract metrics - LOG EACH VALUE
+    const speed = data.speed;
+    const accuracy = data.accuracy;
+    const endurance = data.endurance;
+    
+    console.log("📊 Extracted values:", {
+      speed: speed,
+      accuracy: accuracy,
+      endurance: endurance,
+      speedType: typeof speed,
+      accuracyType: typeof accuracy,
+      enduranceType: typeof endurance
+    });
 
-    // 🔥 SHOW RESULT
+    // Check if values are valid numbers
+    if (speed === undefined || accuracy === undefined || endurance === undefined) {
+      console.error("❌ Missing metrics in response. Available keys:", Object.keys(data));
+      alert("Response missing required metrics. Check console.");
+      return;
+    }
+
+    // SHOW RESULT
     const latestResult = document.getElementById("latestAnalysisResult");
     const analysisDetails = document.getElementById("analysisDetails");
 
+    // Make sure the elements exist
+    if (!latestResult || !analysisDetails) {
+      console.error("❌ Could not find result display elements");
+      return;
+    }
+
     latestResult.style.display = "block";
-
+    
+    // Format and display
+    const speedNum = Number(speed).toFixed(2);
+    const accuracyNum = Number(accuracy).toFixed(1);
+    const enduranceNum = Number(endurance).toFixed(1);
+    
     analysisDetails.innerHTML = `
-  <div class="mt-2">
-    ⚡ <strong>Speed:</strong> ${Number(speed).toFixed(2)} m/s<br>
-    🎯 <strong>Accuracy:</strong> ${Number(accuracy).toFixed(1)}%<br>
-    ❤️ <strong>Endurance:</strong> ${Number(endurance).toFixed(1)}%
-  </div>
-`;
+      <div class="mt-2">
+        ⚡ <strong>Speed:</strong> ${speedNum} m/s<br>
+        🎯 <strong>Accuracy:</strong> ${accuracyNum}%<br>
+        ❤️ <strong>Endurance:</strong> ${enduranceNum}%
+      </div>
+    `;
+    
+    console.log("✅ Results displayed successfully");
 
-    // 🔥 SAVE FOR CHART
+    // SAVE FOR CHART
     const athlete = athletes.find(a => a.id === athleteId);
+    if (athlete) {
+      allHistory.push({
+        name: athlete.fullName,
+        speed: speed,
+        accuracy: accuracy,
+        endurance: endurance,
+        timestamp: new Date().toLocaleString()
+      });
 
-    allHistory.push({
-      name: athlete.fullName,
-      speed,
-      accuracy,
-      endurance,
-      timestamp: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("allHistory", JSON.stringify(allHistory));
-
-    renderGlobalChart();
+      localStorage.setItem("allHistory", JSON.stringify(allHistory));
+      renderGlobalChart();
+      console.log("✅ History updated and chart rendered");
+    }
 
   } catch (error) {
-    console.error("Analyze error:", error);
+    console.error("❌ Analyze error:", error);
+    console.error("❌ Error name:", error.name);
+    console.error("❌ Error message:", error.message);
     alert("Error: " + error.message);
   }
 };
@@ -383,8 +443,9 @@ window.addEventForPlayer = async function() {
   }
 
   try {
+    // ✅ FIXED: Change "http://st:8000" to "http://127.0.0.1:8000"
     const response = await fetch(
-      `http://localhost:8000/dates/${currentModalAthleteId}`,
+      `http://127.0.0.1:8000/dates/${currentModalAthleteId}`,
       {
         method: "POST",
         headers: {
@@ -440,7 +501,7 @@ window.addMessageForPlayer = async function() {
 
   try {
     const response = await fetch(
-      `http://localhost:8000/messages/${currentModalAthleteId}`,
+      `http://127.0.0.1:8000/messages/${currentModalAthleteId}`,
       {
         method: "POST",
         headers: {
@@ -479,7 +540,7 @@ function renderPlayerPerfHistory(playerName) {
 async function loadDatesFromBackend(athleteId) {
   try {
     const response = await fetch(
-      `http://localhost:8000/dates/${athleteId}`
+      `http://127.0.0.1:8000/dates/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch dates");
@@ -498,7 +559,7 @@ async function deleteMessage(messageId) {
 
   try {
     const response = await fetch(
-      `http://localhost:8000/messages/${messageId}`,
+      `http://127.0.0.1:8000/messages/${messageId}`,
       { method: "DELETE" }
     );
 
@@ -516,7 +577,7 @@ async function deleteDate(dateId) {
 
   try {
     const response = await fetch(
-      `http://localhost:8000/dates/${dateId}`,
+      `http://127.0.0.1:8000/dates/${dateId}`,
       { method: "DELETE" }
     );
 
@@ -532,7 +593,7 @@ async function deleteDate(dateId) {
 async function loadMessagesFromBackend(athleteId) {
   try {
     const response = await fetch(
-      `http://localhost:8000/messages/${athleteId}`
+      `http://127.0.0.1:8000/messages/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch messages");

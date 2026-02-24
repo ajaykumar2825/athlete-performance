@@ -211,30 +211,34 @@ document.addEventListener("DOMContentLoaded", function() {
   cancelEditBtn.addEventListener('click', cancelEdit);
 
   // ---------- PUBLIC API FOR COACH BACKEND ----------
-  window.displayImportantDates = function(datesArray) {
-    const container = document.getElementById('datesContainer');
-    const noDatesMsg = document.getElementById('noDatesMessage');
-    if (!container) return;
-    container.innerHTML = '';
-    if (!datesArray || datesArray.length === 0) {
-      container.appendChild(noDatesMsg);
-      return;
-    }
-    if (noDatesMsg.parentNode) noDatesMsg.remove();
-    datesArray.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'date-card';
-      card.innerHTML = `
-        <div class="date-title">${item.title || 'Event'}</div>
-        <div class="date-meta">
-          <span><i class="far fa-calendar me-1"></i> ${item.date || ''}</span>
-          ${item.type ? `<span class="date-badge"><i class="far fa-tag me-1"></i>${item.type}</span>` : ''}
-        </div>
-        ${item.description ? `<p class="text-muted mt-2 mb-0 small">${item.description}</p>` : ''}
-      `;
-      container.appendChild(card);
-    });
-  };
+window.displayImportantDates = function(datesArray) {
+  const container = document.getElementById('datesContainer');
+  const noDatesMsg = document.getElementById('noDatesMessage');
+  
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (!datesArray || datesArray.length === 0) {
+    container.appendChild(noDatesMsg);
+    return;
+  }
+  
+  if (noDatesMsg.parentNode) noDatesMsg.remove();
+  
+  datesArray.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'date-card';
+    card.innerHTML = `
+      <div class="date-title">${item.title || 'Important Date'}</div>
+      <div class="date-meta">
+        <span><i class="far fa-calendar me-1"></i> ${item.date || ''}</span>
+        ${item.type ? `<span class="date-badge"><i class="far fa-tag me-1"></i>${item.type}</span>` : ''}
+      </div>
+      ${item.description ? `<p class="text-muted mt-2 mb-0 small">${item.description}</p>` : ''}
+    `;
+    container.appendChild(card);
+  });
+};
 
   window.displayCoachMessages = function(messagesArray) {
     const container = document.getElementById('messagesContainer');
@@ -317,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function() {
 async function connectPlayerToBackend(fullName) {
   try {
     // 1️⃣ Get all athletes from backend
-    const response = await fetch("http://localhost:8000/athletes/");
+    const response = await fetch("http://127.0.0.1:8000/athletes/");
     if (!response.ok) throw new Error("Failed to fetch athletes");
 
     const athletes = await response.json();
@@ -347,7 +351,7 @@ async function connectPlayerToBackend(fullName) {
 async function fetchMessagesForPlayer(athleteId) {
   try {
     const response = await fetch(
-      `http://localhost:8000/messages/${athleteId}`
+      `http://127.0.0.1:8000/messages/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch messages");
@@ -365,20 +369,25 @@ async function fetchMessagesForPlayer(athleteId) {
 async function fetchDatesForPlayer(athleteId) {
   try {
     const response = await fetch(
-      `http://localhost:8000/dates/${athleteId}`
+      `http://127.0.0.1:8000/dates/${athleteId}`
     );
+
+    console.log("Dates response status:", response.status);
 
     if (!response.ok) throw new Error("Failed to fetch dates");
 
     const dates = await response.json();
+    console.log("Raw dates from backend:", dates);
 
-    // Convert backend format to UI format
+    // ✅ IMPROVED: Better formatting with actual data
     const formatted = dates.map(d => ({
-      title: "Coach Event",
+      title: d.description.length > 30 ? d.description.substring(0, 30) + "..." : d.description,
       date: d.event_date,
-      description: d.description
+      description: d.description,
+      type: "Coach Event"
     }));
 
+    console.log("Formatted dates for display:", formatted);
     displayImportantDates(formatted);
 
   } catch (err) {

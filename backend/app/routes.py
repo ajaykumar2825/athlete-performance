@@ -65,16 +65,28 @@ async def upload_video(
     db.refresh(performance)
 
     metrics = process_video(filename)
+    print("🔍 BEFORE CHECK - metrics:", metrics)
+    if "error" in metrics:
+        return metrics
+
+    print("="*50)
+    print("METRICS FROM PROCESS_VIDEO:", metrics)
+    print("TYPE:", type(metrics))
+    print("="*50)
 
     if "error" in metrics:
         return metrics
 
-    return {
-    "message": "Video processed successfully",
-    "speed": metrics["speed"],
-    "accuracy": metrics["accuracy"],
-    "endurance": metrics["endurance"]
-}
+    response_data = {
+        "message": "Video processed successfully",
+        "speed": metrics.get("speed", 0),
+        "accuracy": metrics.get("accuracy", 0),
+        "endurance": metrics.get("endurance", 0)
+    }
+    
+    print("SENDING RESPONSE:", response_data)
+    
+    return response_data
 
 @router.post("/messages/{athlete_id}")
 def create_message(athlete_id: int, payload: dict, db: Session = Depends(get_db)):
@@ -104,7 +116,6 @@ def create_date(athlete_id: int, payload: dict, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_date)
     return new_date
-
 
 @router.get("/dates/{athlete_id}")
 def get_dates(athlete_id: int, db: Session = Depends(get_db)):
