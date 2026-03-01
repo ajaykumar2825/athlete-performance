@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Custom CSS -->
   <link href="style.css" rel="stylesheet">
+  <!-- Chart.js for progress charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -191,18 +193,75 @@
           </div>
         </div>
 
-        <!-- PERFORMANCE DATA (FROM COACH) -->
-        <div class="performance-section mt-5">
-          <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Performance data</h5>
-          <div id="performanceContainer" class="performance-list">
-            <!-- Coach will inject dynamic data here -->
-          </div>
-          <div id="noPerformanceMsg" class="empty-state small">
-            <i class="fas fa-chart-bar fa-2x mb-2 opacity-50"></i>
-            <p class="fw-medium">No performance data yet</p>
-            <span class="text-muted">Coach will post stats here</span>
-          </div>
-        </div>
+<!-- PERFORMANCE DATA (FROM COACH) -->
+<div class="performance-section mt-5">
+  <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Performance data</h5>
+  <div id="performanceContainer" class="performance-list">
+    <!-- Coach will inject dynamic data here -->
+  </div>
+  <div id="noPerformanceMsg" class="empty-state small">
+    <i class="fas fa-chart-bar fa-2x mb-2 opacity-50"></i>
+    <p class="fw-medium">No performance data yet</p>
+    <span class="text-muted">Coach will post stats here</span>
+  </div>
+</div>
+
+<!-- NEW: PROGRESS OVER TIME CHARTS -->
+<div class="charts-section mt-5">
+  <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Progress over time</h5>
+  <div class="chart-tabs mb-3">
+    <div class="btn-group w-100" role="group">
+      <button type="button" class="btn btn-outline-primary active" id="chartSpeedBtn">Speed</button>
+      <button type="button" class="btn btn-outline-primary" id="chartAccuracyBtn">Accuracy</button>
+      <button type="button" class="btn btn-outline-primary" id="chartEnduranceBtn">Endurance</button>
+    </div>
+  </div>
+  <div class="chart-container">
+    <canvas id="progressChart" width="400" height="200"></canvas>
+  </div>
+  <div id="noChartDataMsg" class="empty-state small mt-3" style="display: none;">
+    <i class="fas fa-chart-line fa-2x mb-2 opacity-50"></i>
+    <p class="fw-medium">No chart data available</p>
+    <span class="text-muted">Coach will add progress tracking</span>
+  </div>
+</div>
+
+<!-- NEW: BEST VS WORST PERFORMANCE -->
+<div class="bestworst-section mt-5">
+  <h5 class="fw-bold mb-3"><i class="fas fa-trophy me-2"></i>Best vs Worst Performance</h5>
+  
+  <!-- Best Performance Card -->
+  <div class="performance-comparison mb-4">
+    <div class="comparison-header best">
+      <i class="fas fa-crown me-2"></i>Best Performance
+    </div>
+    <div id="bestPerformanceContainer" class="comparison-content">
+      <div class="empty-state small">
+        <i class="fas fa-trophy fa-2x mb-2 opacity-50"></i>
+        <p class="fw-medium">No best performance data</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Worst Performance Card -->
+  <div class="performance-comparison">
+    <div class="comparison-header worst">
+      <i class="fas fa-exclamation-triangle me-2"></i>Worst Performance
+    </div>
+    <div id="worstPerformanceContainer" class="comparison-content">
+      <div class="empty-state small">
+        <i class="fas fa-chart-line fa-2x mb-2 opacity-50"></i>
+        <p class="fw-medium">No worst performance data</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Improvement Suggestion (when both best and worst exist) -->
+  <div id="improvementSuggestion" class="improvement-card mt-3" style="display: none;">
+    <i class="fas fa-lightbulb me-2"></i>
+    <span id="suggestionText"></span>
+  </div>
+</div>
       </div>
     </div>
     <div id="profileOverlay" class="profile-overlay"></div>

@@ -396,3 +396,309 @@ html, body {
     font-size: 1.4rem;
   }
 }
+
+/* ---------- ENHANCED COACH INTERFACE STYLES ---------- */
+.chart-section {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid #edf2f7;
+}
+
+.chart-tabs .btn-group {
+  gap: 0.5rem;
+}
+
+.chart-tabs .btn-outline-primary {
+  border-radius: 50px !important;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.chart-tabs .btn-outline-primary.active {
+  background: linear-gradient(135deg, #2a5c8a, #1e3e5f);
+  border-color: #2a5c8a;
+  color: white;
+}
+
+.chart-container {
+  width: 100%;
+  height: 250px;
+  position: relative;
+}
+
+.bestworst-section {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid #edf2f7;
+}
+
+.performance-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #edf2f7;
+  margin-bottom: 1rem;
+}
+
+.performance-card.best .card-header {
+  background: linear-gradient(135deg, #FFD700, #FDB931);
+  color: white;
+  padding: 1rem;
+  font-weight: 700;
+}
+
+.performance-card.worst .card-header {
+  background: linear-gradient(135deg, #FF6384, #d94a6a);
+  color: white;
+  padding: 1rem;
+  font-weight: 700;
+}
+
+.card-content {
+  padding: 1.25rem;
+  background: #f8fafc;
+}
+
+.comparison-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.comparison-item:last-child {
+  border-bottom: none;
+}
+
+.comparison-label {
+  color: #475569;
+  font-weight: 500;
+}
+
+.comparison-value {
+  font-weight: 700;
+  color: #0b2d4b;
+  background: white;
+  padding: 0.3rem 1rem;
+  border-radius: 50px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.improvement-card {
+  background: linear-gradient(135deg, #e6f7ff, #d1e9ff);
+  border-left: 5px solid #2a5c8a;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  color: #1e3b5c;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.improvement-card i {
+  font-size: 1.2rem;
+  color: #FFA500;
+}
+
+.sessions-table {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid #edf2f7;
+}
+
+.sessions-table table {
+  font-size: 0.9rem;
+}
+
+.sessions-table th {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+}
+
+.delete-session-btn {
+  background: none;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.delete-session-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.video-section {
+  background: linear-gradient(135deg, #f0f9ff, #e6f3ff);
+  border: 2px dashed #2a5c8a;
+}
+
+/* ---------- INJURY RISK SECTION ---------- */
+.injury-risk-section {
+  background: linear-gradient(145deg, #ffffff, #f8fcff);
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid rgba(42, 92, 138, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+  margin-top: 1.5rem;
+}
+
+.risk-main-card {
+  background: #f0f7ff;
+  border-radius: 20px;
+  padding: 1.2rem;
+  border-left: 5px solid #2a5c8a;
+}
+
+.risk-level-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.risk-gauge {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.risk-percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e3b5c;
+  text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+}
+
+.risk-status {
+  flex: 1;
+}
+
+.risk-badge {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.risk-badge.low { background: #d4edda; color: #155724; }
+.risk-badge.moderate { background: #fff3cd; color: #856404; }
+.risk-badge.high { background: #f8d7da; color: #721c24; }
+.risk-badge.critical { background: #dc3545; color: white; }
+
+.risk-trend {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.risk-factors-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.risk-factor-item {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+
+.factor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.factor-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.factor-value {
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.risk-progress {
+  height: 8px;
+  border-radius: 10px;
+  background: #e9ecef;
+}
+
+.risk-progress .progress-bar {
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.risk-recommendations {
+  background: #ebf5ff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  border-left: 4px solid #2a5c8a;
+}
+
+.recommendations-header {
+  font-weight: 700;
+  color: #1e3b5c;
+  margin-bottom: 0.8rem;
+}
+
+.recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recommendations-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed rgba(42, 92, 138, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.recommendations-list li:last-child {
+  border-bottom: none;
+}
+
+.recommendations-list li i {
+  color: #FFA500;
+  font-size: 0.8rem;
+}
+
+.risk-history-chart {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .risk-level-indicator {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .risk-gauge {
+    margin: 0 auto;
+  }
+}

@@ -359,3 +359,173 @@ html, body {
     font-size: 1.3rem !important;
   }
 }
+
+/* ---------- PROGRESS CHARTS ---------- */
+.charts-section {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  border: 1px solid #edf2f7;
+}
+
+.chart-tabs .btn-group {
+  gap: 0.5rem;
+}
+
+.chart-tabs .btn-outline-primary {
+  border-radius: 50px !important;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.chart-tabs .btn-outline-primary.active {
+  background: linear-gradient(135deg, #36A2EB, #1f7ea8);
+  border-color: #36A2EB;
+  color: white;
+}
+
+.chart-container {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  margin-top: 1rem;
+}
+
+/* ---------- BEST VS WORST PERFORMANCE ---------- */
+.bestworst-section {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  border: 1px solid #edf2f7;
+}
+
+.performance-comparison {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #edf2f7;
+}
+
+.comparison-header {
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.comparison-header.best {
+  background: linear-gradient(135deg, #FFD700, #FDB931);
+}
+
+.comparison-header.worst {
+  background: linear-gradient(135deg, #FF6384, #d94a6a);
+}
+
+.comparison-content {
+  padding: 1.25rem;
+  background: #f8fafc;
+}
+
+.comparison-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.comparison-item:last-child {
+  border-bottom: none;
+}
+
+.comparison-label {
+  color: #475569;
+  font-weight: 500;
+}
+
+.comparison-value {
+  font-weight: 700;
+  color: #0b2d4b;
+  background: white;
+  padding: 0.3rem 1rem;
+  border-radius: 50px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.improvement-card {
+  background: linear-gradient(135deg, #e6f7ff, #d1e9ff);
+  border-left: 5px solid #36A2EB;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  color: #1e3b5c;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.improvement-card i {
+  font-size: 1.2rem;
+  color: #FFA500;
+}
+
+/* Add these missing styles to style.css */
+
+/* Progress bar styles */
+.progress {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  transition: width 0.6s ease;
+}
+
+.progress-bar.bg-primary {
+  background-color: #2a5c8a !important;
+}
+
+.progress-bar.bg-success {
+  background-color: #28a745 !important;
+}
+
+.progress-bar.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+/* Card header styles */
+.performance-card .card-header {
+  padding: 1rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Delete button styles */
+.delete-session-btn {
+  background: none;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.delete-session-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Progress stats container */
+.progress-stats {
+  margin-top: 10px;
+}

@@ -89,72 +89,220 @@
   <div id="coachProfileOverlay" class="profile-overlay"></div>
 
   <!-- ===== DASHBOARD: ATHLETE LIST + VIDEO ANALYSIS ===== -->
-  <div class="dashboard-main">
-    <!-- LEFT: Athlete management panel -->
-    <div class="athlete-panel">
-      <div class="section-title"><i class="fas fa-users me-2"></i>Athletes</div>
-      
-      <!-- Add Athlete (with surname) -->
-      <div class="add-bar">
-        <input type="text" id="athleteFullName" class="form-control" placeholder="Full name (with surname)">
-        <input type="text" id="athleteSportInput" class="form-control" placeholder="Sport">
-        <button class="btn btn-primary" onclick="addAthlete()"><i class="fas fa-plus-circle me-1"></i>Add</button>
-      </div>
-      
-      <!-- Search -->
-      <div class="search-bar">
-        <input type="text" id="searchAthleteInput" class="form-control" placeholder="Search athletes..." onkeyup="searchAthletes()">
-      </div>
+<div class="dashboard-main">
+  <!-- LEFT: Athlete management panel (keep your existing code) -->
+  <div class="athlete-panel">
+    <div class="section-title"><i class="fas fa-users me-2"></i>Athletes</div>
+    
+    <!-- Add Athlete -->
+    <div class="add-bar">
+      <input type="text" id="athleteFullName" class="form-control" placeholder="Full name (with surname)">
+      <input type="text" id="athleteSportInput" class="form-control" placeholder="Sport">
+      <button class="btn btn-primary" onclick="addAthlete()"><i class="fas fa-plus-circle me-1"></i>Add</button>
+    </div>
+    
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchAthleteInput" class="form-control" placeholder="Search athletes..." onkeyup="searchAthletes()">
+    </div>
 
-      <!-- Athlete Table with REMOVE button -->
-      <div class="table-responsive">
-        <table class="athlete-table">
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Sport</th>
-              <th>Manage</th>
-              <th>Remove</th>
-            </tr>
-          </thead>
-          <tbody id="athleteTableBody"></tbody>
-        </table>
+    <!-- Athlete Table -->
+    <div class="table-responsive">
+      <table class="athlete-table">
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Sport</th>
+            <th>Manage</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody id="athleteTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT: Enhanced Video Analysis Panel (FIXED - Single instance) -->
+  <div class="right-panel">
+    <div class="section-title"><i class="fas fa-chart-line me-2"></i>Performance Analysis</div>
+    
+    <!-- Athlete Selection -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Select Athlete</label>
+      <select id="analysisAthleteSelect" class="form-select"></select>
+    </div>
+
+    <!-- Date Selection -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Practice Date</label>
+      <input type="date" id="practiceDate" class="form-control">
+    </div>
+
+    <!-- Video Upload Section -->
+    <div class="video-section">
+      <h6 class="fw-bold mb-3"><i class="fas fa-video me-2"></i>Upload Practice Video</h6>
+      <div class="mb-3">
+        <input type="file" id="coachVideoUpload" accept="video/*" class="form-control">
+        <small class="text-muted">Upload video for the selected date</small>
+      </div>
+      <button type="button" class="btn btn-success w-100 mb-3" onclick="analyzeAndSaveVideo()">
+        <i class="fas fa-microchip me-2"></i>Analyze & Save
+      </button>
+      
+      <!-- Current Analysis Result -->
+      <div id="latestAnalysisResult" class="analysis-result" style="display:none;">
+        <h6 class="fw-bold"><i class="fas fa-chart-bar me-1"></i>Current Session Results</h6>
+        <div id="analysisDetails" class="mt-2"></div>
       </div>
     </div>
 
-    <!-- RIGHT: Video Upload + Analysis + Global Chart -->
-    <div class="right-panel">
-      <div class="section-title"><i class="fas fa-video me-2"></i>Performance Analysis</div>
+    <!-- Historical Performance Chart -->
+    <div class="chart-section mt-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-history me-2"></i>Performance Progress</h6>
+      <div class="chart-tabs mb-2">
+        <div class="btn-group w-100" role="group">
+          <button type="button" class="btn btn-outline-primary active" id="chartSpeedBtn" onclick="switchChart('speed')">Speed</button>
+          <button type="button" class="btn btn-outline-primary" id="chartAccuracyBtn" onclick="switchChart('accuracy')">Accuracy</button>
+          <button type="button" class="btn btn-outline-primary" id="chartEnduranceBtn" onclick="switchChart('endurance')">Endurance</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="performanceProgressChart"></canvas>
+      </div>
+      <div id="noChartDataMsg" class="empty-state small mt-2" style="display: none;">
+        <i class="fas fa-chart-line fa-2x mb-2 opacity-50"></i>
+        <p class="fw-medium">No historical data yet</p>
+      </div>
+    </div>
+
+    <!-- Best vs Worst Performance Cards -->
+    <div class="bestworst-section mt-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-trophy me-2"></i>Best vs Worst Performance</h6>
       
-      <!-- Video Upload Section -->
-      <div class="video-section">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">1. Select Athlete</label>
-          <select id="analysisAthleteSelect" class="form-select"></select>
+      <!-- Best Performance -->
+      <div class="performance-card best mb-3">
+        <div class="card-header">
+          <i class="fas fa-crown me-2"></i>Best Performance
         </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">2. Upload performance video</label>
-          <input type="file" id="coachVideoUpload" accept="video/*" class="form-control">
+        <div id="bestPerformanceContent" class="card-content">
+          <div class="empty-state small">Select an athlete to view</div>
         </div>
-        <button type="button"
-        class="btn btn-success w-100"
-        onclick="analyzeAthleteVideo()"></i>Analyze & Save</button>
-        
-        <!-- Latest analysis result -->
-        <div id="latestAnalysisResult" class="analysis-result" style="display:none;">
-          <h6 class="fw-bold"><i class="fas fa-microchip me-1"></i>Latest result</h6>
-          <div id="analysisDetails"></div>
+      </div>
+      
+      <!-- Worst Performance -->
+      <div class="performance-card worst">
+        <div class="card-header">
+          <i class="fas fa-exclamation-triangle me-2"></i>Worst Performance
+        </div>
+        <div id="worstPerformanceContent" class="card-content">
+          <div class="empty-state small">Select an athlete to view</div>
         </div>
       </div>
 
-      <!-- Global Accuracy Chart (Coach overview) -->
-      <div style="margin-top: 0.5rem;">
-        <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2"></i>Accuracy breakdown (all athletes)</h6>
-        <canvas id="accuracyChartGlobal" width="400" height="200"></canvas>
+      <!-- After Best vs Worst Performance section and before Practice History -->
+
+<!-- NEW: Injury Risk Prediction Panel -->
+<div class="injury-risk-section mt-4">
+  <h6 class="fw-bold mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Injury Risk Assessment</h6>
+  
+  <!-- Main Risk Indicator -->
+  <div class="risk-main-card mb-3" id="injuryRiskMain">
+    <div class="risk-level-indicator">
+      <div class="risk-gauge">
+        <canvas id="riskGaugeChart" width="120" height="120"></canvas>
+        <div class="risk-percentage" id="riskPercentage">0%</div>
+      </div>
+      <div class="risk-status">
+        <div class="risk-badge" id="riskLevelBadge">Low Risk</div>
+        <div class="risk-trend" id="riskTrend">
+          <i class="fas fa-minus"></i> Stable
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Risk Factor Breakdown -->
+  <div class="risk-factors-grid" id="riskFactorsContainer">
+    <div class="risk-factor-item">
+      <div class="factor-header">
+        <span class="factor-name"><i class="fas fa-balance-scale me-1"></i>Asymmetry</span>
+        <span class="factor-value" id="asymmetryValue">0%</span>
+      </div>
+      <div class="progress risk-progress">
+        <div class="progress-bar bg-warning" id="asymmetryBar" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <div class="risk-factor-item">
+      <div class="factor-header">
+        <span class="factor-name"><i class="fas fa-wave-square me-1"></i>Movement Quality</span>
+        <span class="factor-value" id="movementValue">0%</span>
+      </div>
+      <div class="progress risk-progress">
+        <div class="progress-bar bg-info" id="movementBar" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <div class="risk-factor-item">
+      <div class="factor-header">
+        <span class="factor-name"><i class="fas fa-bone me-1"></i>Joint Stress</span>
+        <span class="factor-value" id="jointStressValue">0%</span>
+      </div>
+      <div class="progress risk-progress">
+        <div class="progress-bar bg-danger" id="jointStressBar" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations Card -->
+  <div class="risk-recommendations mt-3" id="riskRecommendations" style="display: none;">
+    <div class="recommendations-header">
+      <i class="fas fa-lightbulb me-2"></i>Recommendations
+    </div>
+    <ul class="recommendations-list" id="recommendationsList">
+      <!-- Will be populated dynamically -->
+    </ul>
+  </div>
+
+  <!-- Historical Risk Chart (Small) -->
+  <div class="risk-history-chart mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="small fw-bold">Risk Trend</span>
+      <span class="small text-muted">Last 5 sessions</span>
+    </div>
+    <canvas id="riskTrendChart" height="60"></canvas>
+  </div>
+</div>
+      
+
+
+      <!-- Improvement Suggestion -->
+      <div id="improvementSuggestion" class="improvement-card mt-3" style="display: none;">
+        <i class="fas fa-lightbulb me-2"></i>
+        <span id="suggestionText"></span>
+      </div>
+    </div>
+
+    <!-- Practice History Table -->
+    <div class="sessions-table mt-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-calendar-alt me-2"></i>Practice History</h6>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Speed</th>
+              <th>Accuracy</th>
+              <th>Endurance</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="practiceHistoryTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
   <!-- ===== PLAYER DETAIL MODAL (hidden by default) ===== -->
   <div id="playerDetailModal" class="modal-custom" style="display: none;">
     <div class="modal-content-custom">
@@ -201,6 +349,11 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="mt-4">
+  <h6 class="fw-bold">Team Accuracy Overview</h6>
+  <canvas id="accuracyChartGlobal"></canvas>
 </div>
 
 <!-- Bootstrap JS for tabs -->

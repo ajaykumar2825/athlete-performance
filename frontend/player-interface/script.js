@@ -50,15 +50,22 @@ document.addEventListener("DOMContentLoaded", function() {
   const editWeight = document.getElementById('editWeight');
   const editSport = document.getElementById('editSport');
 
-  // ---------- GLOBAL STATE ----------
-  let currentAthlete = {
-    fullName: '',
-    profilePhoto: null,
-    age: null,
-    height: null,
-    weight: null,
-    sport: ''
-  };
+// ---------- GLOBAL STATE (add these to existing state) ----------
+let currentAthlete = {
+  fullName: '',
+  profilePhoto: null,
+  age: null,
+  height: null,
+  weight: null,
+  sport: ''
+};
+
+// NEW: Chart and performance data state
+let progressChart = null;
+let currentChartMetric = 'speed';
+let performanceHistory = [];
+let bestPerformance = null;
+let worstPerformance = null;
 
   // ---------- LOGIN VALIDATION & SUBMIT ----------
   // Restrict password input to letters, numbers, and common symbols
@@ -264,6 +271,247 @@ window.displayImportantDates = function(datesArray) {
     });
   };
 
+// ---------- NEW: PERFORMANCE CHARTS ----------
+function initializeChart() {
+  const canvas = document.getElementById('progressChart');
+  if (!canvas) {
+    console.error('Progress chart canvas not found');
+    return;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  
+  if (progressChart) {
+    progressChart.destroy();
+  }
+  
+  progressChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Performance',
+        data: [],
+        borderColor: '#36A2EB',
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#FF6384',
+        pointBorderColor: 'white',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: '#0b1a2a',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.8)', // Fixed: removed # symbol
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0,0,0,0.05)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+}
+
+// FIXED: Update chart with data from backend
+window.updateProgressChart = function(metric, data) {
+  const chartCanvas = document.getElementById('progressChart');
+  const noDataMsg = document.getElementById('noChartDataMsg');
+  
+  // Add null checks
+  if (!chartCanvas || !noDataMsg) {
+    console.error('Chart elements not found');
+    return;
+  }
+  
+  // Check if data exists and has labels
+  if (!data || !data.labels || data.labels.length === 0) {
+    chartCanvas.style.display = 'none';
+    noDataMsg.style.display = 'flex';
+    return;
+  }
+  
+  chartCanvas.style.display = 'block';
+  noDataMsg.style.display = 'none';
+  
+  // Initialize chart if it doesn't exist
+  if (!progressChart) {
+    initializeChart();
+    // If initialization failed, return
+    if (!progressChart) return;
+  }
+  
+  // Update chart data
+  progressChart.data.labels = data.labels;
+  progressChart.data.datasets[0].data = data.values;
+  progressChart.data.datasets[0].label = metric.charAt(0).toUpperCase() + metric.slice(1) + ' Progress';
+  progressChart.update();
+};
+
+// NEW: Display best/worst performance
+window.displayBestWorstPerformance = function(best, worst) {
+
+  const bestContainer = document.getElementById('bestPerformanceContainer');
+  const worstContainer = document.getElementById('worstPerformanceContainer');
+
+  // BEST
+  if (best) {
+    bestContainer.innerHTML = `
+      <div class="comparison-item">
+        <span class="comparison-label">Date</span>
+        <span class="comparison-value">${best.practice_date}</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Speed</span>
+        <span class="comparison-value">${best.speed.toFixed(2)} m/s</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Accuracy</span>
+        <span class="comparison-value">${best.accuracy.toFixed(1)}%</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Endurance</span>
+        <span class="comparison-value">${best.endurance.toFixed(1)}%</span>
+      </div>
+    `;
+  }
+
+  // WORST
+  if (worst) {
+    worstContainer.innerHTML = `
+      <div class="comparison-item">
+        <span class="comparison-label">Date</span>
+        <span class="comparison-value">${worst.practice_date}</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Speed</span>
+        <span class="comparison-value">${worst.speed.toFixed(2)} m/s</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Accuracy</span>
+        <span class="comparison-value">${worst.accuracy.toFixed(1)}%</span>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-label">Endurance</span>
+        <span class="comparison-value">${worst.endurance.toFixed(1)}%</span>
+      </div>
+    `;
+  }
+};
+
+// NEW: Chart tab switching
+document.addEventListener('DOMContentLoaded', function() {
+  // Add chart tab listeners
+  const speedBtn = document.getElementById('chartSpeedBtn');
+  const accuracyBtn = document.getElementById('chartAccuracyBtn');
+  const enduranceBtn = document.getElementById('chartEnduranceBtn');
+  
+  if (accuracyBtn) {
+    accuracyBtn.addEventListener('click', function() {
+      accuracyBtn.classList.add('active');
+      speedBtn.classList.remove('active');
+      enduranceBtn.classList.remove('active');
+      currentChartMetric = 'accuracy';
+      fetchPerformanceHistory(currentAthlete.id, 'accuracy');
+    });
+  }
+  
+if (accuracyBtn) {
+  accuracyBtn.addEventListener('click', function() {
+    accuracyBtn.classList.add('active');
+    speedBtn.classList.remove('active');
+    enduranceBtn.classList.remove('active');
+    currentChartMetric = 'accuracy';
+    fetchPerformanceHistory(currentAthlete.id, 'accuracy');
+  });
+}
+  
+  if (enduranceBtn) {
+    enduranceBtn.addEventListener('click', function() {
+      enduranceBtn.classList.add('active');
+      speedBtn.classList.remove('active');
+      accuracyBtn.classList.remove('active');
+      currentChartMetric = 'endurance';
+      fetchPerformanceHistory(currentAthlete.id, 'endurance');
+    });
+  }
+  
+  // Initialize chart
+  initializeChart();
+});
+
+// NEW: Fetch performance history for charts
+async function fetchPerformanceHistory(athleteId, metric = 'accuracy') {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/performance/history/${athleteId}?metric=${metric}`);
+        if (!response.ok) throw new Error('Failed to fetch performance history');
+        
+        const performances = await response.json();
+        
+        // Format for chart
+        const chartData = {
+            labels: performances.map(p => p.practice_date),
+            values: performances.map(p => p[metric])
+        };
+        
+        // Update chart in player interface
+        if (window.updateProgressChart) {
+            window.updateProgressChart(metric, chartData);
+        }
+        
+        return performances;
+    } catch (err) {
+        console.error('Error fetching performance history:', err);
+    }
+}
+
+// NEW: Fetch best/worst performance
+async function fetchBestWorstPerformance(athleteId) {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/performance/bestworst/${athleteId}`);
+        if (!response.ok) throw new Error('Failed to fetch best/worst performance');
+        
+        const data = await response.json();
+        
+        // Display in player interface
+        if (window.displayBestWorstPerformance) {
+            window.displayBestWorstPerformance(data.best, data.worst);
+        }
+        
+        return data;
+    } catch (err) {
+        console.error('Error fetching best/worst:', err);
+    }
+}
+
+
   window.displayPerformanceData = function(performanceArray) {
     const container = document.getElementById('performanceContainer');
     const noPerfMsg = document.getElementById('noPerformanceMsg');
@@ -335,12 +583,16 @@ async function connectPlayerToBackend(fullName) {
     }
 
     const athleteId = athlete.id;
+currentAthlete.id = athleteId;
 
     // 3️⃣ Fetch messages
     await fetchMessagesForPlayer(athleteId);
 
     // 4️⃣ Fetch important dates
     await fetchDatesForPlayer(athleteId);
+
+    await fetchPerformanceHistory(athleteId, 'speed');
+    await fetchBestWorstPerformance(athleteId);
 
   } catch (err) {
     console.error("Backend connection error:", err);
