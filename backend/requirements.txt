@@ -4,7 +4,5 @@ sqlalchemy
 pydantic
 python-multipart
 opencv-python-headless
-mediapipe
+mediapipe==0.10.9
 numpy
-sqlalchemy
-python-multipart
