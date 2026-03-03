@@ -1,7 +1,10 @@
 fastapi
 uvicorn
+sqlalchemy
+pydantic
+python-multipart
 opencv-python-headless
 mediapipe
 numpy
-sqlalchemy
-python-multipart
+scikit-learn
+gunicorn
