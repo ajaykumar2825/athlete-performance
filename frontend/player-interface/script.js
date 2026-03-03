@@ -470,7 +470,7 @@ if (accuracyBtn) {
 // NEW: Fetch performance history for charts
 async function fetchPerformanceHistory(athleteId, metric = 'accuracy') {
     try {
-        const response = await fetch(`http://athlete-performance-3.onrender.com/performance/history/${athleteId}?metric=${metric}`);
+        const response = await fetch(`https://athlete-performance-3.onrender.com/performance/history/${athleteId}?metric=${metric}`);
         if (!response.ok) throw new Error('Failed to fetch performance history');
         
         const performances = await response.json();
@@ -495,7 +495,7 @@ async function fetchPerformanceHistory(athleteId, metric = 'accuracy') {
 // NEW: Fetch best/worst performance
 async function fetchBestWorstPerformance(athleteId) {
     try {
-        const response = await fetch(`http://athlete-performance-3.onrender.com/performance/bestworst/${athleteId}`);
+        const response = await fetch(`https://athlete-performance-3.onrender.com/performance/bestworst/${athleteId}`);
         if (!response.ok) throw new Error('Failed to fetch best/worst performance');
         
         const data = await response.json();
@@ -603,7 +603,7 @@ currentAthlete.id = athleteId;
 async function fetchMessagesForPlayer(athleteId) {
   try {
     const response = await fetch(
-      `http://athlete-performance-3.onrender.com/messages/${athleteId}`
+      `https://athlete-performance-3.onrender.com/messages/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch messages");
@@ -621,7 +621,7 @@ async function fetchMessagesForPlayer(athleteId) {
 async function fetchDatesForPlayer(athleteId) {
   try {
     const response = await fetch(
-      `http://athlete-performance-3.onrender.com/dates/${athleteId}`
+      `https://athlete-performance-3.onrender.com/dates/${athleteId}`
     );
 
     console.log("Dates response status:", response.status);
