@@ -6,5 +6,5 @@ python-multipart
 opencv-python-headless
 mediapipe
 numpy
-scikit-learn
-gunicorn
+sqlalchemy
+python-multipart
