@@ -44,7 +44,7 @@ function showApp(name) {
   populateAnalysisSelect();
 
   // ✅ Then sync with backend silently in background
-  fetch("http://127.0.0.1:8000/athletes/")
+  fetch("https://athlete-performance-3.onrender.com/athletes/")
     .then(r => r.json())
     .then(data => {
       athletes = data.map(a => ({ id: a.id, fullName: a.full_name, sport: a.sport }));
@@ -125,7 +125,7 @@ window.addAthlete = async function() {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/athletes/?full_name=${encodeURIComponent(fullName)}&sport=${encodeURIComponent(sport)}`,
+      `http://athlete-performance-3.onrender.com/athletes/?full_name=${encodeURIComponent(fullName)}&sport=${encodeURIComponent(sport)}`,
       { method: "POST" }
     );
     if (!response.ok) throw new Error("Failed to save athlete");
@@ -155,7 +155,7 @@ window.removeAthlete = async function(athleteId) {
   if (!athlete) return;
 
   try {
-    const response = await fetch(`http://127.0.0.1:8000/athletes/${athleteId}`, {
+    const response = await fetch(`http://athlete-performance-3.onrender.com/athletes/${athleteId}`, {
       method: "DELETE"
     });
     if (!response.ok) throw new Error("Failed to delete from backend");
@@ -277,9 +277,9 @@ window.addEventForPlayer = async function() {
   }
 
   try {
-    // ✅ FIXED: Change "http://st:8000" to "http://127.0.0.1:8000"
+    // ✅ FIXED: Change "http://st:8000" to "http://athlete-performance-3.onrender.com"
     const response = await fetch(
-      `http://127.0.0.1:8000/dates/${currentModalAthleteId}`,
+      `http://athlete-performance-3.onrender.com/dates/${currentModalAthleteId}`,
       {
         method: "POST",
         headers: {
@@ -335,7 +335,7 @@ window.addMessageForPlayer = async function() {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/messages/${currentModalAthleteId}`,
+      `http://athlete-performance-3.onrender.com/messages/${currentModalAthleteId}`,
       {
         method: "POST",
         headers: {
@@ -374,7 +374,7 @@ function renderPlayerPerfHistory(playerName) {
 async function loadDatesFromBackend(athleteId) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/dates/${athleteId}`
+      `http://athlete-performance-3.onrender.com/dates/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch dates");
@@ -393,7 +393,7 @@ async function deleteMessage(messageId) {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/messages/${messageId}`,
+      `http://athlete-performance-3.onrender.com/messages/${messageId}`,
       { method: "DELETE" }
     );
 
@@ -411,7 +411,7 @@ async function deleteDate(dateId) {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/dates/${dateId}`,
+      `http://athlete-performance-3.onrender.com/dates/${dateId}`,
       { method: "DELETE" }
     );
 
@@ -427,7 +427,7 @@ async function deleteDate(dateId) {
 async function loadMessagesFromBackend(athleteId) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/messages/${athleteId}`
+      `http://athlete-performance-3.onrender.com/messages/${athleteId}`
     );
 
     if (!response.ok) throw new Error("Failed to fetch messages");
@@ -486,7 +486,7 @@ window.analyzeAndSaveVideo = async function() {
     analyzeBtn.disabled = true;
 
 const response = await fetch(
-  `http://127.0.0.1:8000/analysis/${athleteId}?practice_date=${practiceDate}`,
+  `http://athlete-performance-3.onrender.com/analysis/${athleteId}?practice_date=${practiceDate}`,
   {
     method: "POST",
     body: formData
